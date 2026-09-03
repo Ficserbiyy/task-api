@@ -15,6 +15,7 @@ import (
 func main() {
 	mux := http.NewServeMux()
 
+	// http://127.0.0.1:8080/swagger/index.html
 	mux.HandleFunc("/swagger/", httpSwagger.WrapHandler)
 
 	log.Println("Server listening on http://127.0.0.1:8080")
