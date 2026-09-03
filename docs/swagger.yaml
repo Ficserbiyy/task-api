@@ -1,0 +1,8 @@
+basePath: /
+host: 127.0.0.1:8080
+info:
+  contact: {}
+  description: A simple task API written in Go.
+  title: Task API
+paths: {}
+swagger: "2.0"
