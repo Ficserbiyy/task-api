@@ -11,12 +11,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var (
-	errInvalidSubClaim = errors.New(
-		"could not validate credentials: sub claim missing or invalid",
-	)
-)
-
 // HashPassword securely hashes password
 // using direct bcrypt library.
 func HashPassword(password string) (string, error) {
@@ -78,15 +72,20 @@ func DecodeAccessToken(tokenStr string) (string, error) {
 	// 1. Parse and validate the token signature and expiration
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (any, error) {
 		// Ensure the signing method matches what you expect (e.g., HMAC/HS256)
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+		if token.Method != jwt.SigningMethodHS256 {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(config.SecretKey), nil
 	})
 
-	// Handle invalid token or parsing error
-	if err != nil || !token.Valid {
-		return "", fmt.Errorf("token validation failed: %w", err)
+	// Handle parsing error
+	if err != nil {
+		return "", fmt.Errorf("invalid token: %w", err)
+	}
+
+	// Handle invalid token
+	if !token.Valid {
+		return "", errors.New("invalid token")
 	}
 
 	// 2. Extract payload claims
