@@ -3,7 +3,11 @@ package auth
 import (
 	"errors"
 	"fmt"
+	"maps"
+	"time"
 
+	"github.com/Ficserbiyy/task-api/internal/config"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -45,4 +49,20 @@ func VerifyPassword(plain, hashed string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+// CreateAccessToken generates a secure JWT string given custom payload data.
+func CreateAccessToken(data map[string]any) (string, error) {
+	// Create a new map to avoid mutating the input map
+	claims := jwt.MapClaims{}
+	maps.Copy(claims, data)
+
+	// Add the standard "exp" claim as a Unix timestamp
+	claims["exp"] = time.Now().Add(config.TokenExpire * time.Minute).Unix()
+
+	// Token with the signing method (HS256)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// Sign and return the encoded JWT token string
+	return token.SignedString([]byte(config.SecretKey))
 }
