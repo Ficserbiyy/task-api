@@ -2,7 +2,11 @@ package auth
 
 import (
 	"context"
+	"errors"
+	"log"
 	"net/http"
+
+	"gorm.io/gorm"
 )
 
 type (
@@ -27,33 +31,44 @@ func getUserByEmail(email string) (User, error) {
 	return User{Email: email}, nil
 }
 
+// The GetCurrentUser function either
+// provides the current user's ID, or returns
+// false if the user is not authenticated.
+func GetCurrentUser(w http.ResponseWriter, ctx context.Context) (uint, bool) {
+	userID, ok := ctx.Value(userIDContextKey).(uint)
+
+	return userID, ok
+}
+
 // AuthMiddleware ensures user authentication,
-// and puts user.ID into context.
+// and puts the user id into context.
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Extract JWT from cookie.
 		cookie, err := r.Cookie(sessionCookieKey)
 		if err != nil {
-			raiseUnauthorized(w)
+			ErrUnauthorized.Raise(w)
 			return
 		}
 
 		// Validate JWT and extract subject.
 		email, err := DecodeAccessToken(cookie.Value)
 		if err != nil {
-			raiseUnauthorized(w)
+			log.Println(err)
+			ErrUnauthorized.Raise(w)
 			return
 		}
 
 		user, err := getUserByEmail(email)
 
 		if err != nil || !user.IsActive {
-			if !user.IsActive {
-				raiseUnauthorized(w)
+			if errors.Is(err, gorm.ErrRecordNotFound) || !user.IsActive {
+				ErrUnauthorized.Raise(w)
 				return
 			}
 
-			http.Error(w, messageStatus500, http.StatusInternalServerError)
+			log.Println(err)
+			ErrInternal.Raise(w)
 			return
 		}
 
