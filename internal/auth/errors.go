@@ -20,13 +20,13 @@ type (
 // Errors used by the HTTP server.
 var (
 
-	// 401 Unauthorized.
+	// 401 Unauthorized
 	ErrUnauthorized = HTTPException{
 		Code:    http.StatusUnauthorized,
 		Message: "not authorized",
 	}
 
-	// 500 Internal Server Error.
+	// 500 Internal Server Error
 	ErrInternal = HTTPException{
 		Code:    http.StatusInternalServerError,
 		Message: "internal server error",

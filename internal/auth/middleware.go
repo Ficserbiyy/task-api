@@ -25,10 +25,18 @@ const (
 	sessionCookieKey = "current_user_session"
 )
 
-func getUserByEmail(email string) (User, error) {
+// getUserByEmail returns
+// User if found in the database,
+// otherwise gorm.ErrRecordNotFound.
+func getUserByEmail(email string, db *gorm.DB, ctx context.Context) (User, error) {
 	// Find the user
+	var user User
 
-	return User{Email: email}, nil
+	err := db.WithContext(ctx).
+		Where("email = ?", email).
+		First(&user).Error
+
+	return user, err
 }
 
 // The GetCurrentUser function either
@@ -42,7 +50,7 @@ func GetCurrentUser(w http.ResponseWriter, ctx context.Context) (uint, bool) {
 
 // AuthMiddleware ensures user authentication,
 // and puts the user id into context.
-func AuthMiddleware(next http.Handler) http.Handler {
+func AuthMiddleware(db *gorm.DB, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Extract JWT from cookie.
 		cookie, err := r.Cookie(sessionCookieKey)
@@ -59,11 +67,11 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		user, err := getUserByEmail(email)
+		user, err := getUserByEmail(email, db, r.Context())
 
 		if err != nil || !user.IsActive {
 			if errors.Is(err, gorm.ErrRecordNotFound) || !user.IsActive {
-				ErrUnauthorized.Raise(w)
+				http.Error(w, "user not found", http.StatusUnauthorized)
 				return
 			}
 
