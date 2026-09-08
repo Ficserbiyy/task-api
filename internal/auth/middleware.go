@@ -6,17 +6,12 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Ficserbiyy/task-api/internal/config"
 	"gorm.io/gorm"
 )
 
 type (
 	contextKey string
-
-	User struct {
-		ID       uint
-		Email    string
-		IsActive bool
-	}
 )
 
 const (
@@ -25,12 +20,12 @@ const (
 	sessionCookieKey = "current_user_session"
 )
 
-// getUserByEmail returns
+// GetUserByEmail returns
 // User if found in the database,
 // otherwise gorm.ErrRecordNotFound.
-func getUserByEmail(email string, db *gorm.DB, ctx context.Context) (User, error) {
+func GetUserByEmail(email string, db *gorm.DB, ctx context.Context) (config.User, error) {
 	// Find the user
-	var user User
+	var user config.User
 
 	err := db.WithContext(ctx).
 		Where("email = ?", email).
@@ -55,7 +50,7 @@ func AuthMiddleware(db *gorm.DB, next http.Handler) http.Handler {
 		// Extract JWT from cookie.
 		cookie, err := r.Cookie(sessionCookieKey)
 		if err != nil {
-			ErrUnauthorized.Raise(w)
+			config.ErrUnauthorized.Raise(w)
 			return
 		}
 
@@ -63,11 +58,11 @@ func AuthMiddleware(db *gorm.DB, next http.Handler) http.Handler {
 		email, err := DecodeAccessToken(cookie.Value)
 		if err != nil {
 			log.Println(err)
-			ErrUnauthorized.Raise(w)
+			config.ErrUnauthorized.Raise(w)
 			return
 		}
 
-		user, err := getUserByEmail(email, db, r.Context())
+		user, err := GetUserByEmail(email, db, r.Context())
 
 		if err != nil || !user.IsActive {
 			if errors.Is(err, gorm.ErrRecordNotFound) || !user.IsActive {
@@ -76,7 +71,7 @@ func AuthMiddleware(db *gorm.DB, next http.Handler) http.Handler {
 			}
 
 			log.Println(err)
-			ErrInternal.Raise(w)
+			config.ErrInternal.Raise(w)
 			return
 		}
 

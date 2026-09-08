@@ -14,7 +14,7 @@ COPY . .
 
 # Build a static Linux binary.
 RUN CGO_ENABLED=0 GOOS=linux go build \
-    -o /task-api \
+    -o /bin/task-api \
     ./cmd/server
 
 
@@ -25,8 +25,8 @@ WORKDIR /app
 # CA certificates are useful for HTTPS requests.
 RUN apk add --no-cache ca-certificates
 
-COPY --from=builder /task-api /app/task-api
+COPY --from=builder /bin/task-api /app/bin/task-api
 
 EXPOSE 8000
 
-ENTRYPOINT ["/app/task-api"]
+ENTRYPOINT ["/app/bin/task-api"]
