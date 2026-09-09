@@ -17,7 +17,7 @@ type (
 const (
 	userIDContextKey contextKey = "user_id"
 
-	sessionCookieKey = "current_user_session"
+	SessionCookieKey = "current_user_session"
 )
 
 // GetUserByEmail returns
@@ -48,7 +48,7 @@ func GetCurrentUser(w http.ResponseWriter, ctx context.Context) (uint, bool) {
 func AuthMiddleware(db *gorm.DB, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Extract JWT from cookie.
-		cookie, err := r.Cookie(sessionCookieKey)
+		cookie, err := r.Cookie(SessionCookieKey)
 		if err != nil {
 			config.ErrUnauthorized.Raise(w)
 			return

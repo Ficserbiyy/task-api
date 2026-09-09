@@ -22,6 +22,12 @@ var (
 		Message: "not authorized",
 	}
 
+	// 401 Unathorized
+	ErrIncorectPassword = HTTPException{
+		Code:    http.StatusUnauthorized,
+		Message: "incorrect email address or password",
+	}
+
 	// 500 Internal Server Error
 	ErrInternal = HTTPException{
 		Code:    http.StatusInternalServerError,
@@ -29,7 +35,7 @@ var (
 	}
 
 	// 400 Bad Request
-	ErrInvalid = HTTPException{
+	ErrInvalidRequest = HTTPException{
 		Code:    http.StatusBadRequest,
 		Message: "invalid request body",
 	}
