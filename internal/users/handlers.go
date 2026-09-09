@@ -54,3 +54,60 @@ func Register(db *gorm.DB) http.HandlerFunc {
 		})
 	}
 }
+
+func Login(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req authenticationRequest
+
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			config.ErrInvalidRequest.Raise(w)
+			return
+		}
+
+		user, err := auth.GetUserByEmail(req.Email, db, r.Context())
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				config.ErrIncorectPassword.Raise(w)
+				return
+			}
+			config.ErrInternal.Raise(w)
+			return
+		}
+
+		ok, err := auth.VerifyPassword(
+			req.Password,
+			user.Hashed,
+		)
+		if err != nil {
+			config.ErrInternal.Raise(w)
+			return
+		}
+
+		if !ok {
+			config.ErrIncorectPassword.Raise(w)
+			return
+		}
+
+		accessToken, err := auth.CreateAccessToken(map[string]any{
+			"sub": user.Email,
+		})
+		if err != nil {
+			http.Error(w, "failed to create access token", http.StatusInternalServerError)
+			return
+		}
+
+		http.SetCookie(w, &http.Cookie{
+			Name:     auth.SessionCookieKey,
+			Value:    accessToken,
+			HttpOnly: true,
+			Secure:   false,
+			SameSite: http.SameSiteLaxMode,
+			Path:     "/",
+			MaxAge:   config.TokenExpire * 60,
+		})
+
+		_ = json.NewEncoder(w).Encode(map[string]string{
+			"detail": "Successfully logged in",
+		})
+	}
+}

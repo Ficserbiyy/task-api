@@ -10,16 +10,21 @@ import (
 
 	_ "github.com/Ficserbiyy/task-api/docs"
 	"github.com/Ficserbiyy/task-api/internal/services"
+	"github.com/Ficserbiyy/task-api/internal/users"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func main() {
-	_, err := services.ConnectToDatabase()
+	db, err := services.ConnectToDatabase()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	mux := http.NewServeMux()
+
+	// public endpoints
+	mux.HandleFunc("POST /auth/register", users.Register(db))
+	mux.HandleFunc("POST /auth/login", users.Login(db))
 
 	// http://0.0.0.0:8080/swagger/index.html
 	mux.HandleFunc("/swagger/", httpSwagger.WrapHandler)
