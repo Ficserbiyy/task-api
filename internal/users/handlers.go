@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func Register(db *gorm.DB) http.HandlerFunc {
+func (h *UserRepository) Register() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req authenticationRequest
 
@@ -19,7 +19,7 @@ func Register(db *gorm.DB) http.HandlerFunc {
 			return
 		}
 
-		_, err := auth.GetUserByEmail(req.Email, db, r.Context())
+		_, err := auth.GetUserByEmail(req.Email, h.DB, r.Context())
 		if err == nil {
 			http.Error(w, "email registered", http.StatusBadRequest)
 			return
@@ -42,7 +42,7 @@ func Register(db *gorm.DB) http.HandlerFunc {
 			IsActive: true,
 		}
 
-		if err := db.WithContext(r.Context()).Create(&user).Error; err != nil {
+		if err := h.DB.WithContext(r.Context()).Create(&user).Error; err != nil {
 			http.Error(w, "failed to create user", http.StatusInternalServerError)
 			return
 		}
@@ -55,7 +55,7 @@ func Register(db *gorm.DB) http.HandlerFunc {
 	}
 }
 
-func Login(db *gorm.DB) http.HandlerFunc {
+func (h *UserRepository) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req authenticationRequest
 
@@ -64,7 +64,7 @@ func Login(db *gorm.DB) http.HandlerFunc {
 			return
 		}
 
-		user, err := auth.GetUserByEmail(req.Email, db, r.Context())
+		user, err := auth.GetUserByEmail(req.Email, h.DB, r.Context())
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				config.ErrIncorectPassword.Raise(w)

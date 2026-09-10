@@ -71,7 +71,6 @@ func CreateAccessToken(data map[string]any) (string, error) {
 func DecodeAccessToken(tokenStr string) (string, error) {
 	// 1. Parse and validate the token signature and expiration
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (any, error) {
-		// Ensure the signing method matches what you expect (e.g., HMAC/HS256)
 		if token.Method != jwt.SigningMethodHS256 {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -80,7 +79,7 @@ func DecodeAccessToken(tokenStr string) (string, error) {
 
 	// Handle parsing error
 	if err != nil {
-		return "", fmt.Errorf("invalid token: %w", err)
+		return "", fmt.Errorf("token validation failed: %w", err)
 	}
 
 	// Handle invalid token

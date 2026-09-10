@@ -17,6 +17,7 @@ type (
 const (
 	userIDContextKey contextKey = "user_id"
 
+	// Key used as a cookie name
 	SessionCookieKey = "current_user_session"
 )
 
