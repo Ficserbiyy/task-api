@@ -7,6 +7,6 @@ type authenticationRequest struct {
 	Password string `json:"password"`
 }
 
-type UserRepository struct {
+type UserService struct {
 	DB *gorm.DB
 }

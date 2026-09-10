@@ -10,7 +10,34 @@ import (
 	"gorm.io/gorm"
 )
 
-func (h *UserRepository) Register() http.HandlerFunc {
+func SetSessionCookie(w http.ResponseWriter, accessToken string) {
+	// User for logout
+	if accessToken == "" {
+		http.SetCookie(w, &http.Cookie{
+			Name:     auth.SessionCookieKey,
+			Value:    "",
+			Path:     "/",
+			MaxAge:   -1,
+			HttpOnly: true,
+			Secure:   false,
+			SameSite: http.SameSiteLaxMode,
+		})
+		return
+	}
+
+	// User for login
+	http.SetCookie(w, &http.Cookie{
+		Name:     auth.SessionCookieKey,
+		Value:    accessToken,
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		Path:     "/",
+		MaxAge:   config.TokenExpire * 60,
+	})
+}
+
+func (s *UserService) Register() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req authenticationRequest
 
@@ -19,7 +46,7 @@ func (h *UserRepository) Register() http.HandlerFunc {
 			return
 		}
 
-		_, err := auth.GetUserByEmail(req.Email, h.DB, r.Context())
+		_, err := auth.GetUserByEmail(req.Email, s.DB, r.Context())
 		if err == nil {
 			http.Error(w, "email registered", http.StatusBadRequest)
 			return
@@ -42,7 +69,7 @@ func (h *UserRepository) Register() http.HandlerFunc {
 			IsActive: true,
 		}
 
-		if err := h.DB.WithContext(r.Context()).Create(&user).Error; err != nil {
+		if err := s.DB.WithContext(r.Context()).Create(&user).Error; err != nil {
 			http.Error(w, "failed to create user", http.StatusInternalServerError)
 			return
 		}
@@ -55,7 +82,7 @@ func (h *UserRepository) Register() http.HandlerFunc {
 	}
 }
 
-func (h *UserRepository) Login() http.HandlerFunc {
+func (s *UserService) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req authenticationRequest
 
@@ -64,7 +91,7 @@ func (h *UserRepository) Login() http.HandlerFunc {
 			return
 		}
 
-		user, err := auth.GetUserByEmail(req.Email, h.DB, r.Context())
+		user, err := auth.GetUserByEmail(req.Email, s.DB, r.Context())
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				config.ErrIncorectPassword.Raise(w)
@@ -96,18 +123,17 @@ func (h *UserRepository) Login() http.HandlerFunc {
 			return
 		}
 
-		http.SetCookie(w, &http.Cookie{
-			Name:     auth.SessionCookieKey,
-			Value:    accessToken,
-			HttpOnly: true,
-			Secure:   false,
-			SameSite: http.SameSiteLaxMode,
-			Path:     "/",
-			MaxAge:   config.TokenExpire * 60,
-		})
-
+		SetSessionCookie(w, accessToken)
 		_ = json.NewEncoder(w).Encode(map[string]string{
 			"detail": "Successfully logged in",
 		})
 	}
+}
+
+func Logout(w http.ResponseWriter, r *http.Request) {
+	SetSessionCookie(w, "")
+
+	_ = json.NewEncoder(w).Encode(map[string]string{
+		"detail": "Successfully logged out",
+	})
 }

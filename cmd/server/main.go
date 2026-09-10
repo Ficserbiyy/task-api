@@ -21,13 +21,14 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	userHandler := users.UserRepository{
+	userRepository := users.UserService{
 		DB: db,
 	}
 
 	// public endpoints
-	mux.HandleFunc("POST /auth/register", userHandler.Register())
-	mux.HandleFunc("POST /auth/login", userHandler.Login())
+	mux.HandleFunc("POST /auth/register", userRepository.Register())
+	mux.HandleFunc("POST /auth/login", userRepository.Login())
+	mux.HandleFunc("/auth/logout", users.Logout)
 
 	// http://0.0.0.0:8080/swagger/index.html
 	mux.HandleFunc("/swagger/", httpSwagger.WrapHandler)
