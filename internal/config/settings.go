@@ -17,6 +17,6 @@ const (
 	// JWT expiration time
 	TokenExpire = 30
 
-	// The Postgresql database port
+	// The PostgreSQL port
 	PostgresPort = "5432"
 )

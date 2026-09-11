@@ -66,7 +66,7 @@ func (s *TaskRepository) Register() http.HandlerFunc {
 			return
 		}
 
-		user := config.User{
+		user := models.User{
 			Email:    req.Email,
 			Hashed:   hashedPassword,
 			IsActive: true,

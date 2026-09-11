@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/Ficserbiyy/task-api/internal/config"
+	"github.com/Ficserbiyy/task-api/internal/models"
 	"gorm.io/gorm"
 )
 
@@ -24,9 +25,9 @@ const (
 // GetUserByEmail returns
 // User if found in the database,
 // otherwise gorm.ErrRecordNotFound.
-func GetUserByEmail(email string, db *gorm.DB, ctx context.Context) (config.User, error) {
+func GetUserByEmail(email string, db *gorm.DB, ctx context.Context) (models.User, error) {
 	// Find the user
-	var user config.User
+	var user models.User
 
 	err := db.WithContext(ctx).
 		Where("email = ?", email).

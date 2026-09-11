@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/Ficserbiyy/task-api/internal/config"
+	"github.com/Ficserbiyy/task-api/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -21,9 +22,26 @@ func ConnectToDatabase() (*gorm.DB, error) {
 		config.PostgresPort,
 	)
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(
+		postgres.Open(dsn),
+		&gorm.Config{},
+	)
 	if err != nil {
-		return nil, fmt.Errorf("unable to connect to database: %w", err)
+		return nil, fmt.Errorf(
+			"unable to connect to database: %w",
+			err,
+		)
+	}
+
+	err = db.AutoMigrate(
+		&models.User{},
+		&models.Task{},
+	)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"unable to make migrations: %w",
+			err,
+		)
 	}
 
 	return db, nil

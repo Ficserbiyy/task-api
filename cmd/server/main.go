@@ -20,10 +20,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	mux := http.NewServeMux()
 	gormRepository := handlers.TaskRepository{
 		DB: db,
 	}
+
+	mux := http.NewServeMux()
 
 	mux.HandleFunc("POST /auth/register", gormRepository.Register())
 	mux.HandleFunc("POST /auth/login", gormRepository.Login())
