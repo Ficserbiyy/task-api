@@ -9,8 +9,8 @@ import (
 	"net/http"
 
 	_ "github.com/Ficserbiyy/task-api/docs"
+	"github.com/Ficserbiyy/task-api/internal/handlers"
 	"github.com/Ficserbiyy/task-api/internal/services"
-	"github.com/Ficserbiyy/task-api/internal/users"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
@@ -21,14 +21,13 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	userRepository := users.UserService{
+	gormRepository := handlers.TaskRepository{
 		DB: db,
 	}
 
-	// public endpoints
-	mux.HandleFunc("POST /auth/register", userRepository.Register())
-	mux.HandleFunc("POST /auth/login", userRepository.Login())
-	mux.HandleFunc("/auth/logout", users.Logout)
+	mux.HandleFunc("POST /auth/register", gormRepository.Register())
+	mux.HandleFunc("POST /auth/login", gormRepository.Login())
+	mux.HandleFunc("/auth/logout", handlers.Logout)
 
 	// http://0.0.0.0:8080/swagger/index.html
 	mux.HandleFunc("/swagger/", httpSwagger.WrapHandler)

@@ -1,4 +1,4 @@
-package users
+package handlers
 
 import (
 	"encoding/json"
@@ -7,11 +7,14 @@ import (
 
 	"github.com/Ficserbiyy/task-api/internal/auth"
 	"github.com/Ficserbiyy/task-api/internal/config"
+	"github.com/Ficserbiyy/task-api/internal/models"
 	"gorm.io/gorm"
 )
 
-func SetSessionCookie(w http.ResponseWriter, accessToken string) {
-	// User for logout
+// Either sets or deletes
+// current_user_session Cookie.
+func setSessionCookie(w http.ResponseWriter, accessToken string) {
+	// Used for logout
 	if accessToken == "" {
 		http.SetCookie(w, &http.Cookie{
 			Name:     auth.SessionCookieKey,
@@ -25,7 +28,7 @@ func SetSessionCookie(w http.ResponseWriter, accessToken string) {
 		return
 	}
 
-	// User for login
+	// Used for login
 	http.SetCookie(w, &http.Cookie{
 		Name:     auth.SessionCookieKey,
 		Value:    accessToken,
@@ -37,9 +40,9 @@ func SetSessionCookie(w http.ResponseWriter, accessToken string) {
 	})
 }
 
-func (s *UserService) Register() http.HandlerFunc {
+func (s *TaskRepository) Register() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req authenticationRequest
+		var req models.RegisterRequest
 
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			config.ErrInvalidRequest.Raise(w)
@@ -82,9 +85,9 @@ func (s *UserService) Register() http.HandlerFunc {
 	}
 }
 
-func (s *UserService) Login() http.HandlerFunc {
+func (s *TaskRepository) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req authenticationRequest
+		var req models.LoginRequest
 
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			config.ErrInvalidRequest.Raise(w)
@@ -123,7 +126,7 @@ func (s *UserService) Login() http.HandlerFunc {
 			return
 		}
 
-		SetSessionCookie(w, accessToken)
+		setSessionCookie(w, accessToken)
 		_ = json.NewEncoder(w).Encode(map[string]string{
 			"detail": "Successfully logged in",
 		})
@@ -131,7 +134,7 @@ func (s *UserService) Login() http.HandlerFunc {
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
-	SetSessionCookie(w, "")
+	setSessionCookie(w, "")
 
 	_ = json.NewEncoder(w).Encode(map[string]string{
 		"detail": "Successfully logged out",
