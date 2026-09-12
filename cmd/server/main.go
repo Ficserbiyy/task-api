@@ -30,10 +30,10 @@ func main() {
 	mux.HandleFunc("POST /auth/login", gormRepository.Login())
 	mux.HandleFunc("/auth/logout", handlers.Logout)
 
-	// http://0.0.0.0:8080/swagger/index.html
+	// http://127.0.0.1:8080/swagger/index.html
 	mux.HandleFunc("/swagger/", httpSwagger.WrapHandler)
 
-	log.Println("Server listening on http://0.0.0.0:8080")
+	log.Println("Server listening on http://127.0.0.1:8080")
 
 	if err := http.ListenAndServe("0.0.0.0:8080", mux); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
