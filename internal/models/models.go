@@ -8,21 +8,21 @@ import (
 
 type (
 	User struct {
-		ID       uint   `gorm:"primaryKey"`
-		Username string `gorm:"uniqueIndex;not null"`
-		Email    string `gorm:"uniqueIndex;not null"`
-		Hashed   string `gorm:"not null"`
-		IsActive bool   `gorm:"not null;default:true"`
+		ID       uint   `gorm:"primaryKey" json:"id"`
+		Username string `gorm:"uniqueIndex;not null" json:"username"`
+		Email    string `gorm:"uniqueIndex;not null" json:"email"`
+		Hashed   string `gorm:"not null" json:"hashed_password"`
+		IsActive bool   `gorm:"not null;default:true" json:"is_active"`
 
-		Tasks []Task `gorm:"foreignKey:OwnerID"`
+		Tasks []Task `gorm:"foreignKey:OwnerID" json:"tasks"`
 	}
 
 	Task struct {
-		ID          uint   `gorm:"primaryKey"`
-		OwnerID     uint   `gorm:"not null;index"`
-		Title       string `gorm:"not null"`
-		Description string `gorm:"not null"`
-		Owner       User   `gorm:"foreignKey:OwnerID"`
+		ID          uint   `gorm:"primaryKey" json:"id"`
+		OwnerID     uint   `gorm:"not null;index" json:"owner_id"`
+		Title       string `gorm:"not null" json:"title"`
+		Description string `gorm:"not null" json:"description"`
+		Owner       User   `gorm:"foreignKey:OwnerID" json:"owner" swaggerignore:"true"`
 		CreatedAt   time.Time
 	}
 

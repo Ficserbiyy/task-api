@@ -1,4 +1,5 @@
 // @title Task API
+// @version 1.0
 // @description A simple task API written in Go.
 // @host 127.0.0.1:8080
 // @BasePath /

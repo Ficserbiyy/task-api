@@ -40,6 +40,17 @@ func setSessionCookie(w http.ResponseWriter, accessToken string) {
 	})
 }
 
+// Register registers a new user
+// @Summary 	Register a user
+// @Description Create a new user
+// @Tags 		public
+// @Accept 		json
+// @Produce 	json
+// @Param 		user body models.RegisterRequest true "User"
+// @Success 	201 {object} models.User
+// @Failure 400 {string} string "Bad Request. Possible causes:<br>• <b>invalid JSON payload</b><br>• <b>email registered</b>"
+// @Failure 500 {string} string "Internal Server Error. Possible causes:<br>• <b>Internal Server Error</b><br>• <b>failed to hash password</b><br>• <b>failed to create user</b>"
+// @Router 		/auth/register [post]
 func (s *TaskRepository) Register() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req models.RegisterRequest

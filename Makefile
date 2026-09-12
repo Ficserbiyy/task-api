@@ -1,14 +1,12 @@
-run:
-	go run .
-
 build:
-	go build -o ./bin/task-api
+	docker compose build
 
-run-binary:
-	./bin/task-api
+run:
+	docker compose up
 
-run-postgres:
-	docker run --name my-postgres -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
+generate-docs:
+	swag init -d ./,cmd/server,internal/handlers --parseInternal -g cmd/server/main.go
 
-test:
-	go test ./...
+recreate:
+	docker compose down
+	docker compose up --build --force-recreate

@@ -1,8 +1,79 @@
 basePath: /
+definitions:
+  models.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  models.Task:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      owner_id:
+        type: integer
+      title:
+        type: string
+    type: object
+  models.User:
+    properties:
+      email:
+        type: string
+      hashed_password:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      tasks:
+        items:
+          $ref: '#/definitions/models.Task'
+        type: array
+      username:
+        type: string
+    type: object
 host: 127.0.0.1:8080
 info:
   contact: {}
   description: A simple task API written in Go.
   title: Task API
-paths: {}
+  version: "1.0"
+paths:
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: invalid JSON payload
+          schema:
+            type: string
+        "500":
+          description: failed to create user
+          schema:
+            type: string
+      summary: Register a user
+      tags:
+      - public
 swagger: "2.0"
