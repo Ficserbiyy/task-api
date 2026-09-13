@@ -48,8 +48,8 @@ func setSessionCookie(w http.ResponseWriter, accessToken string) {
 // @Produce 	json
 // @Param 		user body models.RegisterRequest true "User"
 // @Success 	201 {object} models.User
-// @Failure 400 {string} string "Bad Request. Possible causes:<br>• <b>invalid JSON payload</b><br>• <b>email registered</b>"
-// @Failure 500 {string} string "Internal Server Error. Possible causes:<br>• <b>Internal Server Error</b><br>• <b>failed to hash password</b><br>• <b>failed to create user</b>"
+// @Failure 	400 {string} string "Bad Request. Possible causes:<br>• <b>invalid JSON payload</b><br>• <b>email registered</b>"
+// @Failure 	500 {string} string "Internal Server Error. Possible causes:<br>• <b>Internal Server Error</b><br>• <b>failed to hash password</b><br>• <b>failed to create user</b>"
 // @Router 		/auth/register [post]
 func (s *TaskRepository) Register() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -96,6 +96,18 @@ func (s *TaskRepository) Register() http.HandlerFunc {
 	}
 }
 
+// Login is used for the user login.
+// @Summary 	Log a user in
+// @Description Authenticate the user and set a Cookie
+// @Tags 		public
+// @Accept 		json
+// @Produce 	json
+// @Param 		user body models.LoginRequest true "User"
+// @Success 	200 {object} models.User
+// @Failure		401 {string} string "incorrect email address or password"
+// @Failure 	400 {string} string "invalid JSON payload"
+// @Failure 	500 {string} string "failed to create access token"
+// @Router 		/auth/login  [post]
 func (s *TaskRepository) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req models.LoginRequest
