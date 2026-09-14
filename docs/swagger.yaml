@@ -1,41 +1,18 @@
 basePath: /
 definitions:
+  models.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
   models.RegisterRequest:
     properties:
       email:
         type: string
       password:
         type: string
-      username:
-        type: string
-    type: object
-  models.Task:
-    properties:
-      createdAt:
-        type: string
-      description:
-        type: string
-      id:
-        type: integer
-      owner_id:
-        type: integer
-      title:
-        type: string
-    type: object
-  models.User:
-    properties:
-      email:
-        type: string
-      hashed_password:
-        type: string
-      id:
-        type: integer
-      is_active:
-        type: boolean
-      tasks:
-        items:
-          $ref: '#/definitions/models.Task'
-        type: array
       username:
         type: string
     type: object
@@ -46,6 +23,49 @@ info:
   title: Task API
   version: "1.0"
 paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate the user and set a Cookie
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully logged in
+        "400":
+          description: Invalid JSON payload
+          schema:
+            type: string
+        "401":
+          description: Incorrect email address or password
+          schema:
+            type: string
+        "500":
+          description: Failed to create access token
+          schema:
+            type: string
+      summary: Log a user in
+      tags:
+      - public
+  /auth/logout:
+    post:
+      description: Delete the current user session Cookie
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Log a user out
+      tags:
+      - public
   /auth/register:
     post:
       consumes:
@@ -62,15 +82,16 @@ paths:
       - application/json
       responses:
         "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/models.User'
+          description: Successfully Created
         "400":
-          description: invalid JSON payload
+          description: Bad Request. Possible causes:<br>• <b>Invalid JSON payload</b><br>•
+            <b>Email registered</b>
           schema:
             type: string
         "500":
-          description: failed to create user
+          description: Internal Server Error. Possible causes:<br>• <b>Internal Server
+            Error</b><br>• <b>Failed to hash password</b><br>• <b>Failed to create
+            user</b>
           schema:
             type: string
       summary: Register a user

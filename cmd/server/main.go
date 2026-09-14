@@ -29,7 +29,7 @@ func main() {
 
 	mux.HandleFunc("POST /auth/register", gormRepository.Register())
 	mux.HandleFunc("POST /auth/login", gormRepository.Login())
-	mux.HandleFunc("/auth/logout", handlers.Logout)
+	mux.HandleFunc("POST /auth/logout", handlers.Logout)
 
 	// http://127.0.0.1:8080/swagger/index.html
 	mux.HandleFunc("/swagger/", httpSwagger.WrapHandler)
