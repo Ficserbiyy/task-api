@@ -23,11 +23,18 @@ services:
       - "5438:5432"
 
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     ports:
       - "8080:8080"
     env_file:
       - .env
+    volumes:
+      # Mount current local directory to /app in container for Air watching
+      - .:/app
+      # Anonymous volume to prevent overwriting compiled tmp artifacts
+      - /app/tmp
     depends_on:
       db:
         condition: service_healthy
