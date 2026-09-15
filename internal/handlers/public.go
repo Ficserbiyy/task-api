@@ -78,6 +78,7 @@ func (s *TaskRepository) Register() http.HandlerFunc {
 		}
 
 		user := models.User{
+			Username: req.Username,
 			Email:    req.Email,
 			Hashed:   hashedPassword,
 			IsActive: true,
@@ -161,7 +162,7 @@ func (s *TaskRepository) Login() http.HandlerFunc {
 // @Description Delete the current user session Cookie
 // @Tags 		public
 // @Produce 	json
-// @Success 	200 "OK"
+// @Success 	200 "Successfully logged out"
 // @Router 		/auth/logout  [post]
 func Logout(w http.ResponseWriter, r *http.Request) {
 	setSessionCookie(w, "")

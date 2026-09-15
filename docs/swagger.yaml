@@ -1,5 +1,12 @@
 basePath: /
 definitions:
+  models.CreateTaskRequest:
+    properties:
+      description:
+        type: string
+      title:
+        type: string
+    type: object
   models.LoginRequest:
     properties:
       email:
@@ -14,6 +21,17 @@ definitions:
       password:
         type: string
       username:
+        type: string
+    type: object
+  models.TaskResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      title:
         type: string
     type: object
 host: 127.0.0.1:8080
@@ -62,7 +80,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Successfully logged out
       summary: Log a user out
       tags:
       - public
@@ -97,4 +115,38 @@ paths:
       summary: Register a user
       tags:
       - public
+  /tasks:
+    post:
+      consumes:
+      - application/json
+      description: Create a new task
+      parameters:
+      - description: Task
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.TaskResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Unable to create the task
+          schema:
+            type: string
+      summary: Create a task
+      tags:
+      - tasks
 swagger: "2.0"

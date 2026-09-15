@@ -18,12 +18,24 @@ type (
 	}
 
 	Task struct {
-		ID          uint   `gorm:"primaryKey" json:"id"`
-		OwnerID     uint   `gorm:"not null;index" json:"owner_id"`
-		Title       string `gorm:"not null" json:"title"`
-		Description string `gorm:"not null" json:"description"`
-		Owner       User   `gorm:"foreignKey:OwnerID" json:"owner" swaggerignore:"true"`
-		CreatedAt   time.Time
+		ID          uint      `gorm:"primaryKey" json:"id"`
+		OwnerID     uint      `gorm:"not null;index" json:"owner_id"`
+		Title       string    `gorm:"not null" json:"title"`
+		Description string    `gorm:"not null" json:"description"`
+		Owner       User      `gorm:"foreignKey:OwnerID" json:"owner" swaggerignore:"true"`
+		CreatedAt   time.Time `json:"created_at"`
+	}
+
+	CreateTaskRequest struct {
+		Title       string `json:"title"`
+		Description string `json:"description"`
+	}
+
+	TaskResponse struct {
+		ID          uint      `json:"id"`
+		Title       string    `json:"title"`
+		Description string    `json:"description"`
+		CreatedAt   time.Time `json:"created_at"`
 	}
 
 	RegisterRequest struct {
@@ -37,3 +49,13 @@ type (
 		Password string `json:"password"`
 	}
 )
+
+// Constructs response DTO from Task model.
+func (task Task) ResponseModel() TaskResponse {
+	return TaskResponse{
+		ID:          task.ID,
+		Title:       task.Title,
+		Description: task.Description,
+		CreatedAt:   task.CreatedAt,
+	}
+}
