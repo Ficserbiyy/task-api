@@ -17,6 +17,17 @@ type (
 		Tasks []Task `gorm:"foreignKey:OwnerID" json:"tasks"`
 	}
 
+	RegisterRequest struct {
+		Username string `json:"username"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	LoginRequest struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
 	Task struct {
 		ID          uint      `gorm:"primaryKey" json:"id"`
 		OwnerID     uint      `gorm:"not null;index" json:"owner_id"`
@@ -38,15 +49,12 @@ type (
 		CreatedAt   time.Time `json:"created_at"`
 	}
 
-	RegisterRequest struct {
-		Username string `json:"username"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
-
-	LoginRequest struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
+	Pagination struct {
+		Limit      int   `json:"limit"`
+		Page       int   `json:"page"`
+		TotalRows  int64 `json:"total_rows"`
+		TotalPages int   `json:"total_pages"`
+		Rows       any   `json:"rows"`
 	}
 )
 

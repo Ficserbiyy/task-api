@@ -14,6 +14,18 @@ definitions:
       password:
         type: string
     type: object
+  models.Pagination:
+    properties:
+      limit:
+        type: integer
+      page:
+        type: integer
+      rows: {}
+      total_pages:
+        type: integer
+      total_rows:
+        type: integer
+    type: object
   models.RegisterRequest:
     properties:
       email:
@@ -116,6 +128,41 @@ paths:
       tags:
       - public
   /tasks:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated and sorted list of your tasks
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Number of items (default: 10, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      - description: Sort field and order (e.g., 'id_desc')
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Pagination'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Inernal Server Error
+          schema:
+            type: string
+      summary: Get Tasks
+      tags:
+      - tasks
     post:
       consumes:
       - application/json
