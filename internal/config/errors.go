@@ -39,6 +39,18 @@ var (
 		Code:    http.StatusBadRequest,
 		Message: "invalid request body",
 	}
+
+	// 400 Bad Request
+	ErrInvalidTaskID = HTTPException{
+		Code:    http.StatusBadRequest,
+		Message: "task ID must be a positive integer",
+	}
+
+	// 404 Not Found
+	ErrTaskNotFound = HTTPException{
+		Code:    http.StatusNotFound,
+		Message: "task not found",
+	}
 )
 
 func (e HTTPException) Error() string {

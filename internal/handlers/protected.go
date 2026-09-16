@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"math"
 	"net/http"
@@ -46,6 +48,19 @@ func paginate(page, limit int, sort string) func(db *gorm.DB) *gorm.DB {
 		offset := (page - 1) * limit
 		return db.Offset(offset).Limit(limit)
 	}
+}
+
+// This function returns Task
+// if found in the database,
+// otherwise gorm.ErrRecordNotFound.
+func getTaskByID(id, userID uint, db *gorm.DB, ctx context.Context) (models.Task, error) {
+	var task models.Task
+
+	err := db.WithContext(ctx).
+		Where("id = ? AND owner_id = ?", id, userID).
+		First(&task).Error
+
+	return task, err
 }
 
 // Create method creates a new task
@@ -163,6 +178,53 @@ func (s *TaskRepository) ListTasks() http.HandlerFunc {
 		// Encode directly to writer
 		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(response); err != nil {
+			log.Printf("error encoding tasks response: %v", err)
+		}
+	}
+}
+
+// GetTask method retrieves single task from the database
+// owned by the current user and returns []TaskResponse.
+//
+// @Summary     Get a task
+// @Description Receive an existing, single task record
+// @Tags 		tasks
+// @Produce 	json
+// @Param       id   path      int true "Task ID"
+// @Success     200  {object}  models.TaskResponse
+// @Failure		400  {string}  string "Invalid task ID"
+// @Failure     404  {string}  string "Task not found"
+// @Failure     500  {string}  string "Internal Server Error"
+// @Router 		/tasks/{id} [get]
+func (s *TaskRepository) GetTask() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, ok := auth.GetCurrentUser(r.Context())
+		if !ok {
+			config.ErrUnauthorized.Raise(w)
+			return
+		}
+
+		idStr := r.PathValue("id")
+		id, err := strconv.Atoi(idStr)
+
+		if err != nil || id <= 0 {
+			config.ErrInvalidTaskID.Raise(w)
+			return
+		}
+
+		task, err := getTaskByID(uint(id), userID, s.DB, r.Context())
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				config.ErrTaskNotFound.Raise(w)
+				return
+			}
+			config.ErrInternal.Raise(w)
+			log.Println(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(task.ResponseModel()); err != nil {
 			log.Printf("error encoding tasks response: %v", err)
 		}
 	}

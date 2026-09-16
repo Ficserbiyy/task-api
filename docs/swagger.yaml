@@ -196,4 +196,35 @@ paths:
       summary: Create a task
       tags:
       - tasks
+  /tasks/{id}:
+    get:
+      description: Returns an existing, single task record
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TaskResponse'
+        "400":
+          description: Invalid task ID
+          schema:
+            type: string
+        "404":
+          description: Task not found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get a task
+      tags:
+      - tasks
 swagger: "2.0"
