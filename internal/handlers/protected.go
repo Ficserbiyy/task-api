@@ -53,14 +53,21 @@ func paginate(page, limit int, sort string) func(db *gorm.DB) *gorm.DB {
 // This function returns Task
 // if found in the database,
 // otherwise gorm.ErrRecordNotFound.
-func getTaskByID(id, userID uint, db *gorm.DB, ctx context.Context) (models.Task, error) {
+func getTaskByID(id, ownerID uint, db *gorm.DB, ctx context.Context) (models.Task, error) {
 	var task models.Task
 
 	err := db.WithContext(ctx).
-		Where("id = ? AND owner_id = ?", id, userID).
+		Where("id = ? AND owner_id = ?", id, ownerID).
 		First(&task).Error
 
 	return task, err
+}
+
+// This function removes Task
+// from the database.
+func deleteTask(task *models.Task, db *gorm.DB, ctx context.Context) error {
+	return db.WithContext(ctx).
+		Delete(task).Error
 }
 
 // Create method creates a new task
@@ -227,5 +234,58 @@ func (s *TaskRepository) GetTask() http.HandlerFunc {
 		if err := json.NewEncoder(w).Encode(task.ResponseModel()); err != nil {
 			log.Printf("error encoding tasks response: %v", err)
 		}
+	}
+}
+
+// Delete removes a task from the database by its id.
+//
+// @Summary     Delete a task
+// @Description Delete an existing task record
+// @Tags 		tasks
+// @Produce 	json
+// @Param       id   path 	   int true "Task ID"
+// @Success     200  "Task successfully deleted"
+// @Failure		400  {string}  string "Invalid task ID"
+// @Failure     404  {string}  string "Task not found"
+// @Failure     500  {string}  string "Internal Server Error"
+// @Router 		/tasks/{id} [delete]
+func (s *TaskRepository) Delete() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		userID, ok := auth.GetCurrentUser(ctx)
+		if !ok {
+			config.ErrUnauthorized.Raise(w)
+			return
+		}
+
+		idStr := r.PathValue("id")
+		id, err := strconv.Atoi(idStr)
+
+		if err != nil || id <= 0 {
+			config.ErrInvalidTaskID.Raise(w)
+			return
+		}
+
+		task, err := getTaskByID(uint(id), userID, s.DB, ctx)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				config.ErrTaskNotFound.Raise(w)
+				return
+			}
+			config.ErrInternal.Raise(w)
+			log.Println(err)
+			return
+		}
+
+		if err := deleteTask(&task, s.DB, ctx); err != nil {
+			config.ErrInternal.Raise(w)
+			log.Println(err)
+			return
+		}
+
+		json.NewEncoder(w).Encode(map[string]string{
+			"detail": "Task successfully deleted",
+		})
 	}
 }

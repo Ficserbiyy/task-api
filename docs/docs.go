@@ -231,7 +231,7 @@ const docTemplate = `{
         },
         "/tasks/{id}": {
             "get": {
-                "description": "Returns an existing, single task record",
+                "description": "Receive an existing, single task record",
                 "produces": [
                     "application/json"
                 ],
@@ -254,6 +254,48 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.TaskResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Invalid task ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Task not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete an existing task record",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Delete a task",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Task successfully deleted"
                     },
                     "400": {
                         "description": "Invalid task ID",

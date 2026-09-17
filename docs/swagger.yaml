@@ -197,8 +197,36 @@ paths:
       tags:
       - tasks
   /tasks/{id}:
+    delete:
+      description: Delete an existing task record
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task successfully deleted
+        "400":
+          description: Invalid task ID
+          schema:
+            type: string
+        "404":
+          description: Task not found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete a task
+      tags:
+      - tasks
     get:
-      description: Returns an existing, single task record
+      description: Receive an existing, single task record
       parameters:
       - description: Task ID
         in: path
