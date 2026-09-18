@@ -53,7 +53,11 @@ func paginate(page, limit int, sort string) func(db *gorm.DB) *gorm.DB {
 // This function returns Task
 // if found in the database,
 // otherwise gorm.ErrRecordNotFound.
-func getTaskByID(id, ownerID uint, db *gorm.DB, ctx context.Context) (models.Task, error) {
+func getTaskByID(
+	id, ownerID uint,
+	db *gorm.DB,
+	ctx context.Context,
+) (models.Task, error) {
 	var task models.Task
 
 	err := db.WithContext(ctx).
@@ -68,6 +72,28 @@ func getTaskByID(id, ownerID uint, db *gorm.DB, ctx context.Context) (models.Tas
 func deleteTask(task *models.Task, db *gorm.DB, ctx context.Context) error {
 	return db.WithContext(ctx).
 		Delete(task).Error
+}
+
+// This function updates an existing
+// Task in the database.
+func updateTask(
+	task models.Task,
+	data models.CreateTaskRequest,
+	db *gorm.DB,
+	ctx context.Context,
+) error {
+	if data.Title == "" && data.Description == "" {
+		return nil
+	}
+
+	newTask := models.Task{
+		Title:       data.Title,
+		Description: data.Description,
+	}
+
+	return db.WithContext(ctx).
+		Model(&task).
+		Updates(newTask).Error
 }
 
 // Create method creates a new task
@@ -135,7 +161,7 @@ func (s *TaskRepository) Create() http.HandlerFunc {
 // @Failure		401   {string} string "Unauthorized"
 // @Failure 	500   {string} string "Inernal Server Error"
 // @Router      /tasks [get]
-func (s *TaskRepository) ListTasks() http.HandlerFunc {
+func (s *TaskRepository) List() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := auth.GetCurrentUser(r.Context())
 		if !ok {
@@ -191,7 +217,7 @@ func (s *TaskRepository) ListTasks() http.HandlerFunc {
 }
 
 // GetTask method retrieves single task from the database
-// owned by the current user and returns []TaskResponse.
+// owned by the current user and returns TaskResponse.
 //
 // @Summary     Get a task
 // @Description Receive an existing, single task record
@@ -200,10 +226,11 @@ func (s *TaskRepository) ListTasks() http.HandlerFunc {
 // @Param       id   path      int true "Task ID"
 // @Success     200  {object}  models.TaskResponse
 // @Failure		400  {string}  string "Invalid task ID"
+// @Failure		401  {string}  string "Unauthorized"
 // @Failure     404  {string}  string "Task not found"
 // @Failure     500  {string}  string "Internal Server Error"
 // @Router 		/tasks/{id} [get]
-func (s *TaskRepository) GetTask() http.HandlerFunc {
+func (s *TaskRepository) GetOne() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := auth.GetCurrentUser(r.Context())
 		if !ok {
@@ -246,6 +273,7 @@ func (s *TaskRepository) GetTask() http.HandlerFunc {
 // @Param       id   path 	   int true "Task ID"
 // @Success     200  "Task successfully deleted"
 // @Failure		400  {string}  string "Invalid task ID"
+// @Failure		401  {string}  string "Unauthorized"
 // @Failure     404  {string}  string "Task not found"
 // @Failure     500  {string}  string "Internal Server Error"
 // @Router 		/tasks/{id} [delete]
@@ -286,6 +314,68 @@ func (s *TaskRepository) Delete() http.HandlerFunc {
 
 		json.NewEncoder(w).Encode(map[string]string{
 			"detail": "Task successfully deleted",
+		})
+	}
+}
+
+// Update method updates a task in the database by its ID.
+//
+// @Summary 	 Update a task
+// @Description  Update task details by ID
+// @Tags 		 tasks
+// @Accept 		 json
+// @Produce 	 json
+// @Param        id    path      int  true  "Task ID"
+// @Param        body  body models.CreateTaskRequest true "Task update payload"
+// @Success 	 200   "Task successfully updated"
+// @Failure		 400   {string}  string "Invalid request body"
+// @Failure		 401   {string}  string "Unauthorized"
+// @Failure      404   {string}  string "Task not found"
+// @Failure      500   {string}  string "Internal Server Error"
+// @Router 		 /tasks/{id} [patch]
+func (s *TaskRepository) Update() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		userID, ok := auth.GetCurrentUser(ctx)
+		if !ok {
+			config.ErrUnauthorized.Raise(w)
+			return
+		}
+
+		idStr := r.PathValue("id")
+		id, err := strconv.Atoi(idStr)
+
+		if err != nil || id <= 0 {
+			config.ErrInvalidTaskID.Raise(w)
+			return
+		}
+
+		var req models.CreateTaskRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			config.ErrInvalidRequest.Raise(w)
+			return
+		}
+
+		task, err := getTaskByID(uint(id), userID, s.DB, ctx)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				config.ErrTaskNotFound.Raise(w)
+				return
+			}
+			config.ErrInternal.Raise(w)
+			log.Println(err)
+			return
+		}
+
+		if err := updateTask(task, req, s.DB, ctx); err != nil {
+			config.ErrInternal.Raise(w)
+			log.Println(err)
+			return
+		}
+
+		json.NewEncoder(w).Encode(map[string]string{
+			"detail": "Task successfully updated",
 		})
 	}
 }

@@ -34,9 +34,10 @@ func main() {
 	mux.HandleFunc("POST /auth/logout", handlers.Logout)
 
 	mux.Handle("POST /tasks", auth(http.HandlerFunc(gormRepository.Create())))
-	mux.Handle("GET /tasks", auth(http.HandlerFunc(gormRepository.ListTasks())))
-	mux.Handle("GET /tasks/{id}", auth(http.HandlerFunc(gormRepository.GetTask())))
+	mux.Handle("GET /tasks", auth(http.HandlerFunc(gormRepository.List())))
+	mux.Handle("GET /tasks/{id}", auth(http.HandlerFunc(gormRepository.GetOne())))
 	mux.Handle("DELETE /tasks/{id}", auth(http.HandlerFunc(gormRepository.Delete())))
+	mux.Handle("PATCH /tasks/{id}", auth(http.HandlerFunc(gormRepository.Update())))
 
 	// http://127.0.0.1:8080/swagger/index.html
 	mux.HandleFunc("/swagger/", httpSwagger.WrapHandler)

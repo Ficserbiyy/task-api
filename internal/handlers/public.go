@@ -91,7 +91,7 @@ func (s *TaskRepository) Register() http.HandlerFunc {
 
 		w.WriteHeader(http.StatusCreated)
 
-		_ = json.NewEncoder(w).Encode(map[string]string{
+		json.NewEncoder(w).Encode(map[string]string{
 			"detail": "Successfully registered",
 		})
 	}
@@ -151,7 +151,7 @@ func (s *TaskRepository) Login() http.HandlerFunc {
 		}
 
 		setSessionCookie(w, accessToken)
-		_ = json.NewEncoder(w).Encode(map[string]string{
+		json.NewEncoder(w).Encode(map[string]string{
 			"detail": "Successfully logged in",
 		})
 	}
@@ -167,7 +167,7 @@ func (s *TaskRepository) Login() http.HandlerFunc {
 func Logout(w http.ResponseWriter, r *http.Request) {
 	setSessionCookie(w, "")
 
-	_ = json.NewEncoder(w).Encode(map[string]string{
+	json.NewEncoder(w).Encode(map[string]string{
 		"detail": "Successfully logged out",
 	})
 }
