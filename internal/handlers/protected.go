@@ -141,15 +141,25 @@ func (s *TaskRepository) Me() http.HandlerFunc {
 // in the database and returns TaskResponse.
 //
 // @Summary 	Create a task
+//
 // @Description Create a new task
-// @Tags 		tasks
+//
+// @Tags 		protected
+//
 // @Accept 		json
+//
 // @Produce 	json
+//
 // @Param 		task body models.CreateTaskRequest true "Task"
+//
 // @Success 	201 {object} models.TaskResponse
+//
 // @Failure		401 {string} string "Unauthorized"
+//
 // @Failure 	400 {string} string "Invalid request body"
+//
 // @Failure		500 {string} string "Unable to create the task"
+//
 // @Router 		/tasks [post]
 func (s *TaskRepository) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -191,16 +201,27 @@ func (s *TaskRepository) Create() http.HandlerFunc {
 // owned by the current user and returns []TaskResponse.
 //
 // @Summary     Get Tasks
+//
 // @Description Get a paginated and sorted list of your tasks
-// @Tags        tasks
+//
+// @Tags        protected
+//
 // @Accept      json
+//
 // @Produce     json
-// @Param       page  query    int    false  "Page number (default: 1)"
-// @Param       limit query    int    false  "Number of items (default: 10, max: 100)"
-// @Param       sort  query    string false  "Sort field and order (e.g., 'id_desc')"
-// @Success     200   {object} models.Pagination
-// @Failure		401   {string} string "Unauthorized"
-// @Failure 	500   {string} string "Inernal Server Error"
+//
+// @Param       page   query    int    false  "Page number (default: 1)"
+//
+// @Param       limit  query    int    false  "Number of items (default: 10, max: 100)"
+//
+// @Param       sort   query    string false  "Sort field and order (e.g., 'id_desc')"
+//
+// @Success     200    {object} models.Pagination
+//
+// @Failure		401    {string} string "Unauthorized"
+//
+// @Failure 	500    {string} string "Inernal Server Error"
+//
 // @Router      /tasks [get]
 func (s *TaskRepository) List() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -261,16 +282,26 @@ func (s *TaskRepository) List() http.HandlerFunc {
 // owned by the current user and returns TaskResponse.
 //
 // @Summary     Get a task
+//
 // @Description Receive an existing, single task record
-// @Tags 		tasks
+//
+// @Tags 		protected
+//
 // @Produce 	json
+//
 // @Param       id   path      int true "Task ID"
+//
 // @Success     200  {object}  models.TaskResponse
+//
 // @Failure		400  {string}  string "Invalid task ID"
+//
 // @Failure		401  {string}  string "Unauthorized"
+//
 // @Failure     404  {string}  string "Task not found"
+//
 // @Failure     500  {string}  string "Internal Server Error"
-// @Router 		/tasks/{id} [get]
+//
+// @Router 		/tasks/{id}    [get]
 func (s *TaskRepository) GetOne() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := auth.GetCurrentUser(r.Context())
@@ -305,19 +336,29 @@ func (s *TaskRepository) GetOne() http.HandlerFunc {
 	}
 }
 
-// Delete removes a task from the database by its id.
+// Delete method removes a task from the database by its id.
 //
 // @Summary     Delete a task
+//
 // @Description Delete an existing task record
-// @Tags 		tasks
+//
+// @Tags 		protected
+//
 // @Produce 	json
+//
 // @Param       id   path 	   int true "Task ID"
+//
 // @Success     200  "Task successfully deleted"
+//
 // @Failure		400  {string}  string "Invalid task ID"
+//
 // @Failure		401  {string}  string "Unauthorized"
+//
 // @Failure     404  {string}  string "Task not found"
+//
 // @Failure     500  {string}  string "Internal Server Error"
-// @Router 		/tasks/{id} [delete]
+//
+// @Router 		/tasks/{id}    [delete]
 func (s *TaskRepository) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -362,18 +403,30 @@ func (s *TaskRepository) Delete() http.HandlerFunc {
 // Update method updates a task in the database by its ID.
 //
 // @Summary 	 Update a task
+//
 // @Description  Update task details by ID
-// @Tags 		 tasks
+//
+// @Tags 		 protected
+//
 // @Accept 		 json
+//
 // @Produce 	 json
+//
 // @Param        id    path      int  true  "Task ID"
+//
 // @Param        body  body models.CreateTaskRequest true "Task update payload"
+//
 // @Success 	 200   "Task successfully updated"
+//
 // @Failure		 400   {string}  string "Invalid request body"
+//
 // @Failure		 401   {string}  string "Unauthorized"
+//
 // @Failure      404   {string}  string "Task not found"
+//
 // @Failure      500   {string}  string "Internal Server Error"
-// @Router 		 /tasks/{id} [patch]
+//
+// @Router 		 /tasks/{id} 	 [patch]
 func (s *TaskRepository) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

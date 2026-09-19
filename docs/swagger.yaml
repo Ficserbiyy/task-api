@@ -46,6 +46,15 @@ definitions:
       title:
         type: string
     type: object
+  models.UserResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      username:
+        type: string
+    type: object
 host: 127.0.0.1:8080
 info:
   contact: {}
@@ -84,7 +93,7 @@ paths:
             type: string
       summary: Log a user in
       tags:
-      - public
+      - authentication
   /auth/logout:
     post:
       description: Delete the current user session Cookie
@@ -95,7 +104,7 @@ paths:
           description: Successfully logged out
       summary: Log a user out
       tags:
-      - public
+      - authentication
   /auth/register:
     post:
       consumes:
@@ -126,7 +135,24 @@ paths:
             type: string
       summary: Register a user
       tags:
-      - public
+      - authentication
+  /me:
+    get:
+      description: Receive the current user metadata
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      summary: Get a user
+      tags:
+      - protected
   /tasks:
     get:
       consumes:
@@ -162,7 +188,7 @@ paths:
             type: string
       summary: Get Tasks
       tags:
-      - tasks
+      - protected
     post:
       consumes:
       - application/json
@@ -195,7 +221,7 @@ paths:
             type: string
       summary: Create a task
       tags:
-      - tasks
+      - protected
   /tasks/{id}:
     delete:
       description: Delete an existing task record
@@ -228,7 +254,7 @@ paths:
             type: string
       summary: Delete a task
       tags:
-      - tasks
+      - protected
     get:
       description: Receive an existing, single task record
       parameters:
@@ -262,7 +288,7 @@ paths:
             type: string
       summary: Get a task
       tags:
-      - tasks
+      - protected
     patch:
       consumes:
       - application/json
@@ -302,5 +328,5 @@ paths:
             type: string
       summary: Update a task
       tags:
-      - tasks
+      - protected
 swagger: "2.0"

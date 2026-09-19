@@ -40,16 +40,24 @@ func setSessionCookie(w http.ResponseWriter, accessToken string) {
 	})
 }
 
-// Register registers a new user
 // @Summary 	Register a user
+//
 // @Description Create a new user
-// @Tags 		public
+//
+// @Tags 		authentication
+//
 // @Accept 		json
+//
 // @Produce 	json
+//
 // @Param 		user body models.RegisterRequest true "User"
+//
 // @Success 	201 "Successfully Created"
+//
 // @Failure 	400 {string} string "Bad Request. Possible causes:<br>• <b>Invalid JSON payload</b><br>• <b>Email registered</b>"
+//
 // @Failure 	500 {string} string "Internal Server Error. Possible causes:<br>• <b>Internal Server Error</b><br>• <b>Failed to hash password</b><br>• <b>Failed to create user</b>"
+//
 // @Router 		/auth/register [post]
 func (s *TaskRepository) Register() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -97,17 +105,26 @@ func (s *TaskRepository) Register() http.HandlerFunc {
 	}
 }
 
-// Login is used for the user login.
 // @Summary 	Log a user in
+//
 // @Description Authenticate the user and set a Cookie
-// @Tags 		public
+//
+// @Tags 		authentication
+//
 // @Accept 		json
+//
 // @Produce 	json
+//
 // @Param 		user body models.LoginRequest true "User"
+//
 // @Success 	200 "Successfully logged in"
+//
 // @Failure		401 {string} string "Incorrect email address or password"
+//
 // @Failure 	400 {string} string "Invalid JSON payload"
+//
 // @Failure 	500 {string} string "Failed to create access token"
+//
 // @Router 		/auth/login  [post]
 func (s *TaskRepository) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -157,12 +174,16 @@ func (s *TaskRepository) Login() http.HandlerFunc {
 	}
 }
 
-// Logout is used for the user logout.
 // @Summary 	Log a user out
+//
 // @Description Delete the current user session Cookie
-// @Tags 		public
+//
+// @Tags 		authentication
+//
 // @Produce 	json
+//
 // @Success 	200 "Successfully logged out"
+//
 // @Router 		/auth/logout  [post]
 func Logout(w http.ResponseWriter, r *http.Request) {
 	setSessionCookie(w, "")

@@ -19,7 +19,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "public"
+                    "authentication"
                 ],
                 "summary": "Log a user in",
                 "parameters": [
@@ -65,7 +65,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "public"
+                    "authentication"
                 ],
                 "summary": "Log a user out",
                 "responses": {
@@ -85,7 +85,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "public"
+                    "authentication"
                 ],
                 "summary": "Register a user",
                 "parameters": [
@@ -118,6 +118,32 @@
                 }
             }
         },
+        "/me": {
+            "get": {
+                "description": "Receive the current user metadata",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "protected"
+                ],
+                "summary": "Get a user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.UserResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/tasks": {
             "get": {
                 "description": "Get a paginated and sorted list of your tasks",
@@ -128,7 +154,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "tasks"
+                    "protected"
                 ],
                 "summary": "Get Tasks",
                 "parameters": [
@@ -181,7 +207,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "tasks"
+                    "protected"
                 ],
                 "summary": "Create a task",
                 "parameters": [
@@ -230,7 +256,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "tasks"
+                    "protected"
                 ],
                 "summary": "Get a task",
                 "parameters": [
@@ -281,7 +307,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "tasks"
+                    "protected"
                 ],
                 "summary": "Delete a task",
                 "parameters": [
@@ -332,7 +358,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "tasks"
+                    "protected"
                 ],
                 "summary": "Update a task",
                 "parameters": [
@@ -453,6 +479,20 @@
                     "type": "integer"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UserResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "username": {
                     "type": "string"
                 }
             }
