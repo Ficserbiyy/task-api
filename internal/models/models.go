@@ -17,6 +17,12 @@ type (
 		Tasks []Task `gorm:"foreignKey:OwnerID" json:"tasks"`
 	}
 
+	UserResponse struct {
+		ID       uint   `json:"id"`
+		Username string `json:"username"`
+		Email    string `json:"email"`
+	}
+
 	RegisterRequest struct {
 		Username string `json:"username"`
 		Email    string `json:"email"`
@@ -65,5 +71,14 @@ func (task Task) ResponseModel() TaskResponse {
 		Title:       task.Title,
 		Description: task.Description,
 		CreatedAt:   task.CreatedAt,
+	}
+}
+
+// Constructs response DTO from User model.
+func (user User) ResponseModel() UserResponse {
+	return UserResponse{
+		ID:       user.ID,
+		Email:    user.Email,
+		Username: user.Username,
 	}
 }

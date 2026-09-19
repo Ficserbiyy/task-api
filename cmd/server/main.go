@@ -33,6 +33,7 @@ func main() {
 	mux.HandleFunc("POST /auth/login", gormRepository.Login())
 	mux.HandleFunc("POST /auth/logout", handlers.Logout)
 
+	mux.Handle("GET /me", auth(http.HandlerFunc(gormRepository.Me())))
 	mux.Handle("POST /tasks", auth(http.HandlerFunc(gormRepository.Create())))
 	mux.Handle("GET /tasks", auth(http.HandlerFunc(gormRepository.List())))
 	mux.Handle("GET /tasks/{id}", auth(http.HandlerFunc(gormRepository.GetOne())))

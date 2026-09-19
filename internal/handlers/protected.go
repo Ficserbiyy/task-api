@@ -96,6 +96,47 @@ func updateTask(
 		Updates(newTask).Error
 }
 
+// @Summary 	Get a user
+//
+// @Description Receive the current user metadata
+//
+// @Tags 		protected
+//
+// @Produce 	json
+//
+// @Success 	200 {object} models.UserResponse
+//
+// @Failure		401 {string} string "Unauthorized"
+//
+// @Router 		/me [get]
+func (s *TaskRepository) Me() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		userID, ok := auth.GetCurrentUser(ctx)
+		if !ok {
+			config.ErrUnauthorized.Raise(w)
+			return
+		}
+
+		var user models.User
+		err := s.DB.WithContext(ctx).
+			Where("id = ?", userID).
+			First(&user).Error
+
+		if err != nil {
+			config.ErrInternal.Raise(w)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(user.ResponseModel()); err != nil {
+			log.Printf("error encoding user response: %v", err)
+		}
+
+	}
+}
+
 // Create method creates a new task
 // in the database and returns TaskResponse.
 //
