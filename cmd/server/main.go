@@ -13,6 +13,8 @@ import (
 	"github.com/Ficserbiyy/task-api/internal/auth"
 	"github.com/Ficserbiyy/task-api/internal/handlers"
 	"github.com/Ficserbiyy/task-api/internal/services"
+	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/chi/v5"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
@@ -26,25 +28,31 @@ func main() {
 		DB: db,
 	}
 
-	mux := http.NewServeMux()
+	r := chi.NewRouter()
+	r.Use(middleware.Logger)
 	auth := auth.AuthMiddleware(db)
 
-	mux.HandleFunc("POST /auth/register", gormRepository.Register())
-	mux.HandleFunc("POST /auth/login", gormRepository.Login())
-	mux.HandleFunc("POST /auth/logout", handlers.Logout)
-
-	mux.Handle("GET /me", auth(http.HandlerFunc(gormRepository.Me())))
-	mux.Handle("POST /tasks", auth(http.HandlerFunc(gormRepository.Create())))
-	mux.Handle("GET /tasks", auth(http.HandlerFunc(gormRepository.List())))
-	mux.Handle("GET /tasks/{id}", auth(http.HandlerFunc(gormRepository.GetOne())))
-	mux.Handle("DELETE /tasks/{id}", auth(http.HandlerFunc(gormRepository.Delete())))
-	mux.Handle("PATCH /tasks/{id}", auth(http.HandlerFunc(gormRepository.Update())))
-
 	// http://127.0.0.1:8080/swagger/index.html
-	mux.HandleFunc("/swagger/", httpSwagger.WrapHandler)
+	r.Get("/swagger/*", httpSwagger.WrapHandler)
+
+	r.Post("/auth/register", gormRepository.Register())
+	r.Post("/auth/login", gormRepository.Login())
+	r.Post("/auth/logout", handlers.Logout)
+
+	r.Group(func(r chi.Router) {
+		r.Use(auth)
+
+		r.Get("/me", gormRepository.Me())
+		r.Get("/tasks", gormRepository.List())
+		r.Post("/tasks", gormRepository.Create())
+
+		r.Get("/tasks/{id}", gormRepository.GetOne())
+		r.Patch("/tasks/{id}", gormRepository.Update())
+		r.Delete("/tasks/{id}", gormRepository.Delete())
+	})
 
 	log.Println("Server listening on http://127.0.0.1:8080")
-	if err := http.ListenAndServe("0.0.0.0:8080", mux); err != nil {
+	if err := http.ListenAndServe("0.0.0.0:8080", r); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
 }

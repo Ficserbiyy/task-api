@@ -45,7 +45,8 @@ func GetCurrentUser(ctx context.Context) (uint, bool) {
 	return userID, ok
 }
 
-// AuthMiddleware ensures user authentication,
+// AuthMiddleware is a middleware factory,
+// which ensures user authentication,
 // and puts the user id into context.
 func AuthMiddleware(db *gorm.DB) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {

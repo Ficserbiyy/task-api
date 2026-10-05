@@ -3,6 +3,8 @@ module github.com/Ficserbiyy/task-api
 go 1.26.5
 
 require (
+	github.com/go-chi/chi v1.5.5
+	github.com/go-chi/chi/v5 v5.3.2
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/swaggo/http-swagger v1.3.4
 	github.com/swaggo/swag v1.16.6
